@@ -45,7 +45,10 @@ def get_recent_activity_summary(max_repos: int = 5) -> str:
         )
         response.raise_for_status()
         events = response.json()
-    except requests.RequestException:
+    except Exception:
+        # Source optionnelle : on attrape large (réseau, quota, format
+        # inattendu) — le calendrier éditorial doit continuer sans GitHub,
+        # conformément à la décision de conception documentée dans SETUP.md.
         return ""
 
     seen_repos: dict[str, str] = {}

@@ -2,7 +2,7 @@
 cahier des charges (à l'origine pensé pour PostgreSQL/Supabase)."""
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, String, Text, Date, DateTime
 from sqlalchemy.types import JSON
@@ -12,6 +12,17 @@ from app.database import Base
 
 def generate_uuid() -> str:
     return str(uuid.uuid4())
+
+
+def utc_now() -> datetime:
+    """Horodatage UTC **naïf** (sans offset).
+
+    Convention : tout est stocké en UTC. On retire volontairement le tzinfo
+    car SQLite ne conserve pas les offsets — garder un datetime aware créerait
+    une incohérence entre l'écriture (aware) et la lecture (naïve).
+    Remplace `datetime.utcnow()`, déprécié depuis Python 3.12.
+    """
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class Post(Base):
@@ -26,8 +37,8 @@ class Post(Base):
     langue = Column(String(10), default="fr")
     statut = Column(String(20), default="draft")     # idea | draft | scheduled | published
     date_planifiee = Column(Date, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Note : pas de colonne user_id pour l'instant — projet strictement personnel.
     # Si tu changes d'avis un jour, l'ajouter ici en nullable coûte une migration
