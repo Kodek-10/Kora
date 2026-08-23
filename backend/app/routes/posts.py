@@ -1,4 +1,6 @@
-"""Routes liées à la génération, l'historique et le statut des posts."""
+"""Routes liées à la génération, l'édition, l'historique et le statut des posts."""
+
+import random
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -6,7 +8,13 @@ from typing import Optional
 
 from app.database import get_db
 from app.models.post import Post
-from app.schemas import GeneratePostRequest, GeneratePostResponse, PostOut, UpdateStatusRequest
+from app.schemas import (
+    GeneratePostRequest,
+    GeneratePostResponse,
+    PostOut,
+    UpdatePostRequest,
+    UpdateStatusRequest,
+)
 from app.services.gemini_service import generate_post_text
 from app.services.image_service import generate_image_url
 
@@ -55,6 +63,50 @@ def update_status(post_id: str, payload: UpdateStatusRequest, db: Session = Depe
     if not post:
         raise HTTPException(status_code=404, detail="Post introuvable")
     post.statut = payload.statut
+    db.commit()
+    db.refresh(post)
+    return post
+
+
+@router.patch("/posts/{post_id}", response_model=PostOut)
+def update_post(post_id: str, payload: UpdatePostRequest, db: Session = Depends(get_db)):
+    """Édite le contenu d'un post (sujet, texte, hashtags, date planifiée).
+
+    Le statut ne se modifie volontairement PAS ici — il a sa route dédiée
+    (`/status`) pour que les deux cycles de vie ne puissent pas se marcher
+    dessus depuis un même appel."""
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post introuvable")
+
+    changes = payload.model_dump(exclude_unset=True)  # distingue "absent" de "explicitement null"
+    if not changes:
+        raise HTTPException(status_code=400, detail="Aucun champ à mettre à jour")
+
+    if changes.get("hashtags") is not None:
+        # Nettoyage léger : sans espaces superflus ni entrées vides.
+        changes["hashtags"] = [t.strip() for t in changes["hashtags"] if t.strip()]
+
+    for field, value in changes.items():
+        setattr(post, field, value)
+    db.commit()
+    db.refresh(post)
+    return post
+
+
+@router.post("/posts/{post_id}/regenerate-image", response_model=PostOut)
+def regenerate_image(post_id: str, db: Session = Depends(get_db)):
+    """Régénère l'image à partir du sujet ACTUEL du post.
+
+    Zéro quota Gemini consommé : Pollinations génère depuis une simple URL,
+    on change juste le seed pour obtenir un visuel différent."""
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post introuvable")
+
+    # Seed aléatoire borné : assez d'espace pour éviter les doublons visuels,
+    # sans URL démesurée.
+    post.image_url = generate_image_url(post.sujet, seed=random.randint(0, 999_999_999))
     db.commit()
     db.refresh(post)
     return post

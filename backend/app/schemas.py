@@ -41,6 +41,23 @@ class UpdateStatusRequest(BaseModel):
     statut: str = Field(..., pattern="^(idea|draft|scheduled|published)$")
 
 
+class UpdatePostRequest(BaseModel):
+    """Édition partielle du contenu d'un post.
+
+    Les champs absents restent inchangés ; un champ envoyé explicitement à
+    null est vidé. `extra="forbid"` refuse tout autre champ — notamment le
+    statut, qui possède sa propre route dédiée (`/status`) pour garder les
+    deux cycles de vie bien séparés.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    sujet: Optional[str] = Field(None, min_length=10, max_length=500)
+    post: Optional[str] = None
+    hashtags: Optional[list[str]] = None
+    date_planifiee: Optional[date] = None
+
+
 class SuggestRequest(BaseModel):
     theme: Optional[str] = None
     nombre: int = Field(default=5, ge=1, le=10)

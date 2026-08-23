@@ -98,3 +98,96 @@ class TestUpdateStatus:
         post = seed_post()
         response = client.patch(f"/api/posts/{post.id}/status", json={"statut": "archived"})
         assert response.status_code == 422
+
+
+class TestUpdatePost:
+    """PATCH /api/posts/{id} — édition du contenu, jamais du statut."""
+
+    def test_edition_partielle_ne_touche_que_le_champ_fourni(self, client, seed_post):
+        post = seed_post(sujet="Sujet original suffisamment long", post="Texte initial")
+
+        response = client.patch(f"/api/posts/{post.id}", json={"post": "Texte relu et corrigé."})
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["post"] == "Texte relu et corrigé."
+        assert body["sujet"] == "Sujet original suffisamment long"  # inchangé
+
+    def test_hashtags_nettoyés(self, client, seed_post):
+        post = seed_post()
+        response = client.patch(
+            f"/api/posts/{post.id}",
+            json={"hashtags": ["#IA ", "", "  #AfricaTech", " "]},
+        )
+        assert response.status_code == 200
+        # Espaces retirés, entrées vides supprimées
+        assert response.json()["hashtags"] == ["#IA", "#AfricaTech"]
+
+    def test_vidage_explicite_d_un_champ(self, client, seed_post):
+        from datetime import date
+
+        post = seed_post(post="Texte", date_planifiee=date(2026, 9, 1))
+        response = client.patch(f"/api/posts/{post.id}", json={"post": None, "date_planifiee": None})
+        assert response.status_code == 200
+        body = response.json()
+        assert body["post"] is None
+        assert body["date_planifiee"] is None
+
+    def test_statut_refusé_via_cette_route(self, client, seed_post):
+        """Le statut a sa route dédiée : tenter de le passer ici est refusé
+        (extra=forbid) plutôt que silencieusement ignoré."""
+        post = seed_post(statut="draft")
+        response = client.patch(f"/api/posts/{post.id}", json={"statut": "published"})
+        assert response.status_code == 422
+
+    def test_sujet_trop_court_rejeté(self, client, seed_post):
+        post = seed_post()
+        response = client.patch(f"/api/posts/{post.id}", json={"sujet": "court"})
+        assert response.status_code == 422
+
+    def test_aucun_champ_fourni_rejeté(self, client, seed_post):
+        post = seed_post()
+        response = client.patch(f"/api/posts/{post.id}", json={})
+        assert response.status_code == 400
+
+    def test_post_introuvable(self, client):
+        response = client.patch("/api/posts/id-inconnu", json={"post": "Texte"})
+        assert response.status_code == 404
+
+
+class TestRegenerateImage:
+    """POST /api/posts/{id}/regenerate-image — zéro quota Gemini consommé."""
+
+    def test_nouvelle_url_avec_seed(self, client, seed_post):
+        post = seed_post(sujet="Sujet de départ pour le visuel")
+        old_url = post.image_url
+
+        response = client.post(f"/api/posts/{post.id}/regenerate-image")
+
+        assert response.status_code == 200
+        new_url = response.json()["image_url"]
+        assert new_url != old_url  # le seed rend la régénération réelle
+        assert "seed=" in new_url
+
+    def test_utilise_le_sujet_après_édition(self, client, seed_post):
+        post = seed_post(sujet="Sujet initial du post")
+        client.patch(f"/api/posts/{post.id}", json={"sujet": "Sujet modifié avant régénération"})
+
+        response = client.post(f"/api/posts/{post.id}/regenerate-image")
+
+        from urllib.parse import quote
+
+        assert quote("Sujet modifié avant régénération") in response.json()["image_url"]
+
+    def test_gemini_jamais_appelé(self, client, seed_post):
+        """Garantie structurelle : la route ne dépend pas du service Gemini.
+        On le vérifie en cassant Gemini volontairement — la régénération
+        doit quand même réussir."""
+        with patch("app.routes.posts.generate_post_text", side_effect=RuntimeError("quota")):
+            post = seed_post()
+            response = client.post(f"/api/posts/{post.id}/regenerate-image")
+        assert response.status_code == 200
+
+    def test_post_introuvable(self, client):
+        response = client.post("/api/posts/id-inconnu/regenerate-image")
+        assert response.status_code == 404

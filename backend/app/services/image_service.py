@@ -20,9 +20,16 @@ def build_image_prompt(sujet: str) -> str:
     )
 
 
-def generate_image_url(sujet: str) -> str:
+def generate_image_url(sujet: str, seed: int | None = None) -> str:
     """Retourne l'URL de l'image générée. Pollinations.ai génère l'image à
-    l'accès de l'URL elle-même (pas d'appel HTTP nécessaire côté backend)."""
+    l'accès de l'URL elle-même (pas d'appel HTTP nécessaire côté backend).
+
+    `seed` (optionnel) : sans lui, Pollinations renvoie la même image en cache
+    pour un prompt identique — le seed rend la régénération réellement
+    différente sans consommer de quota Gemini."""
     image_prompt = build_image_prompt(sujet)
     encoded_prompt = quote(image_prompt)
-    return f"{IMAGE_API_BASE_URL}/{encoded_prompt}?width=1200&height=630&nologo=true"
+    url = f"{IMAGE_API_BASE_URL}/{encoded_prompt}?width=1200&height=630&nologo=true"
+    if seed is not None:
+        url += f"&seed={seed}"
+    return url

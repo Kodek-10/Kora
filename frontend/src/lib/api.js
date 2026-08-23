@@ -42,4 +42,13 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify({ statut }),
     }),
+
+  updatePost: (postId, payload) =>
+    request(`/api/posts/${postId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }),
+
+  regenerateImage: (postId) =>
+    request(`/api/posts/${postId}/regenerate-image`, { method: 'POST' }),
 }

@@ -14,6 +14,9 @@ export default function PostGenerator({ initialSujet = '' }) {
   const [result, setResult] = useState(null)
   const [editedText, setEditedText] = useState('')
   const [copied, setCopied] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [regeneratingImage, setRegeneratingImage] = useState(false)
 
   async function handleGenerate() {
     if (sujet.trim().length < 10) {
@@ -48,6 +51,33 @@ export default function PostGenerator({ initialSujet = '' }) {
       document.body.removeChild(textarea)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  async function handleSave() {
+    if (!result) return
+    setSaving(true)
+    try {
+      await api.updatePost(result.id, { post: editedText })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleRegenerateImage() {
+    if (!result) return
+    setRegeneratingImage(true)
+    try {
+      const updated = await api.regenerateImage(result.id)
+      setResult((prev) => ({ ...prev, image_url: updated.image_url }))
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setRegeneratingImage(false)
     }
   }
 
@@ -123,7 +153,16 @@ export default function PostGenerator({ initialSujet = '' }) {
           </div>
 
           {result.image_url && (
-            <img src={result.image_url} alt="Visuel généré" className="w-full rounded-md" />
+            <div className="space-y-2">
+              <img src={result.image_url} alt="Visuel généré" className="w-full rounded-md" />
+              <button
+                onClick={handleRegenerateImage}
+                disabled={regeneratingImage}
+                className="text-xs text-amber-700 font-medium hover:underline disabled:opacity-50"
+              >
+                {regeneratingImage ? 'Régénération…' : 'Régénérer l\u2019image'}
+              </button>
+            </div>
           )}
 
           <div className="flex flex-wrap gap-2">
@@ -134,12 +173,19 @@ export default function PostGenerator({ initialSujet = '' }) {
             ))}
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <button
               onClick={handleCopy}
               className="flex-1 bg-neutral-800 hover:bg-neutral-900 text-white text-sm font-medium py-2 rounded-md transition"
             >
               {copied ? 'Copié !' : 'Copier le texte'}
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="flex-1 border border-amber-600 text-amber-700 hover:bg-amber-50 disabled:opacity-50 text-sm font-medium py-2 rounded-md transition"
+            >
+              {saved ? 'Enregistré !' : saving ? 'Enregistrement…' : 'Enregistrer la relecture'}
             </button>
             <button
               onClick={handleDownloadImage}
