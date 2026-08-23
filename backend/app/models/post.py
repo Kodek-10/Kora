@@ -4,7 +4,7 @@ cahier des charges (à l'origine pensé pour PostgreSQL/Supabase)."""
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, String, Text, Date, DateTime
+from sqlalchemy import Column, Date, DateTime, String, Text
 from sqlalchemy.types import JSON
 
 from app.database import Base
@@ -31,11 +31,11 @@ class Post(Base):
     id = Column(String, primary_key=True, default=generate_uuid)
     sujet = Column(String(500), nullable=False)
     post = Column(Text, nullable=True)
-    hashtags = Column(JSON, nullable=True)          # liste de chaînes, ex: ["#AI", "#AfricaTech"]
+    hashtags = Column(JSON, nullable=True)  # liste de chaînes, ex: ["#AI", "#AfricaTech"]
     image_url = Column(Text, nullable=True)
     ton = Column(String(50), default="décontracté")
     langue = Column(String(10), default="fr")
-    statut = Column(String(20), default="draft")     # idea | draft | scheduled | published
+    statut = Column(String(20), default="draft")  # idea | draft | scheduled | published
     date_planifiee = Column(Date, nullable=True)
     created_at = Column(DateTime, default=utc_now)
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)

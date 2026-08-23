@@ -8,11 +8,14 @@ L'ordre d'affichage suit celui du top stories, indépendamment de l'ordre
 d'arrivée des réponses.
 """
 
+import logging
 from concurrent.futures import ThreadPoolExecutor
 
 import requests
 
 HN_API_BASE = "https://hacker-news.firebaseio.com/v0"
+
+logger = logging.getLogger(__name__)
 
 
 def _fetch_title(story_id: int) -> str | None:
@@ -26,6 +29,7 @@ def _fetch_title(story_id: int) -> str | None:
     except Exception:
         # Source optionnelle : tout problème sur UN article ne doit jamais
         # faire planter le calendrier éditorial.
+        logger.warning("Article Hacker News %s illisible — ignoré.", story_id)
         return None
 
 
@@ -40,6 +44,7 @@ def get_trending_tech_topics(max_items: int = 6) -> str:
     except Exception:
         # Idem : toute erreur (réseau, format inattendu) → pas d'actualités,
         # le calendrier continue sans ce contexte.
+        logger.warning("Source Hacker News indisponible pour les suggestions — ignorée.")
         return ""
 
     if not top_ids:

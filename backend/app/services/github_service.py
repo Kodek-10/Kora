@@ -6,9 +6,13 @@ mais un token personnel augmente la limite de requêtes de 60/h à 5000/h —
 recommandé si tu suggères des sujets souvent).
 """
 
+import logging
+
 import requests
 
-from app.config import GITHUB_USERNAME, GITHUB_TOKEN
+from app.config import GITHUB_TOKEN, GITHUB_USERNAME
+
+logger = logging.getLogger(__name__)
 
 GITHUB_API_BASE = "https://api.github.com"
 
@@ -49,6 +53,8 @@ def get_recent_activity_summary(max_repos: int = 5) -> str:
         # Source optionnelle : on attrape large (réseau, quota, format
         # inattendu) — le calendrier éditorial doit continuer sans GitHub,
         # conformément à la décision de conception documentée dans SETUP.md.
+        # Journalisé pour diagnostic, sans traceback complet en usage courant.
+        logger.warning("Source GitHub indisponible pour les suggestions — ignorée.")
         return ""
 
     seen_repos: dict[str, str] = {}

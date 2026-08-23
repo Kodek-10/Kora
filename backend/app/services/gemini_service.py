@@ -5,11 +5,16 @@ en JSON conforme à un schéma plutôt que de parser du texte libre, ce qui évi
 les ruptures de parsing d'un appel à l'autre.
 """
 
+import json
+import logging
 import time
+
 from google import genai
 from google.genai import types
 
 from app.config import GEMINI_API_KEY, GEMINI_MODEL
+
+logger = logging.getLogger(__name__)
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
@@ -65,7 +70,6 @@ def generate_post_text(sujet: str, ton: str, langue: str, max_retries: int = 2) 
                     response_schema=RESPONSE_SCHEMA,
                 ),
             )
-            import json
             data = json.loads(response.text)
             # Garde-fou : même avec le schema JSON, on revalide manuellement
             # le nombre de hashtags avant de faire confiance à la sortie.
@@ -74,6 +78,7 @@ def generate_post_text(sujet: str, ton: str, langue: str, max_retries: int = 2) 
         except Exception as e:
             is_quota_error = "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e)
             if is_quota_error and attempt < max_retries:
+                logger.warning("Quota Gemini atteint, nouvelle tentative dans %ss…", 2 * (attempt + 1))
                 time.sleep(2 * (attempt + 1))
                 continue
             if is_quota_error:
@@ -81,6 +86,9 @@ def generate_post_text(sujet: str, ton: str, langue: str, max_retries: int = 2) 
                     "Quota Gemini gratuit atteint. Réessaie dans quelques minutes, "
                     "ou passe temporairement à un modèle plus léger."
                 ) from e
+            # Journalisé sans la clé API (l'exception ne transporte que le
+            # message d'erreur de l'API, jamais les identifiants).
+            logger.warning("Échec de l'appel Gemini : %s", e)
             raise RuntimeError(f"Erreur lors de la génération du texte : {e}") from e
 
 
@@ -96,7 +104,8 @@ def generate_topic_suggestions(theme: str | None, nombre: int, context: str = ""
     context_block = (
         f"\n\nContexte réel à utiliser comme inspiration (ne pas inventer de détails "
         f"absents de cette liste, rester factuel si tu t'y réfères) :\n{context}\n"
-        if context else ""
+        if context
+        else ""
     )
     prompt = f"""Propose {nombre} sujets de posts LinkedIn courts et concrets {theme_clause},
 pour un étudiant en informatique passionné d'IA et de cybersécurité, orienté tech africaine.
@@ -120,5 +129,4 @@ Réponds uniquement avec un objet JSON : {{"sujets": ["sujet 1", "sujet 2", ...]
             },
         ),
     )
-    import json
     return json.loads(response.text)["sujets"][:nombre]

@@ -4,6 +4,7 @@ de la base de données au frontend."""
 
 from datetime import date, datetime
 from typing import Optional
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -62,8 +63,10 @@ class SuggestRequest(BaseModel):
     theme: Optional[str] = None
     nombre: int = Field(default=5, ge=1, le=10)
     jours: int = Field(
-        default=7, ge=1, le=30,
-        description="Étale les suggestions sur cet intervalle de jours à partir de demain."
+        default=7,
+        ge=1,
+        le=30,
+        description="Étale les suggestions sur cet intervalle de jours à partir de demain.",
     )
     inclure_github: bool = Field(
         default=True, description="Utiliser l'activité GitHub récente comme inspiration."

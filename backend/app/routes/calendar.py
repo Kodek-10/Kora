@@ -20,9 +20,12 @@ router = APIRouter(prefix="/api/calendar", tags=["calendar"])
 def get_calendar(db: Session = Depends(get_db)):
     """Retourne les posts en statut 'idea' ou 'scheduled' — la vue calendrier,
     triée par date planifiée (les non-datées en dernier)."""
-    return db.query(Post).filter(Post.statut.in_(["idea", "scheduled"])).order_by(
-        Post.date_planifiee.is_(None), Post.date_planifiee.asc()
-    ).all()
+    return (
+        db.query(Post)
+        .filter(Post.statut.in_(["idea", "scheduled"]))
+        .order_by(Post.date_planifiee.is_(None), Post.date_planifiee.asc())
+        .all()
+    )
 
 
 def _spread_dates(nombre: int, jours: int) -> list[date]:
@@ -60,12 +63,12 @@ def suggest_topics(payload: SuggestRequest, db: Session = Depends(get_db)):
     try:
         sujets = generate_topic_suggestions(payload.theme, payload.nombre, context=context)
     except RuntimeError as e:
-        raise HTTPException(status_code=502, detail=str(e))
+        raise HTTPException(status_code=502, detail=str(e)) from e
 
     dates = _spread_dates(len(sujets), payload.jours)
 
     created = []
-    for sujet, planned_date in zip(sujets, dates):
+    for sujet, planned_date in zip(sujets, dates, strict=False):
         post = Post(sujet=sujet, statut="scheduled", date_planifiee=planned_date)
         db.add(post)
         created.append(post)

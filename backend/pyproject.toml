@@ -1,0 +1,20 @@
+[project]
+name = "kora-backend"
+version = "0.1.0"
+description = "Backend Kora — générateur personnel de posts LinkedIn (usage strictement local)"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+exclude = ["venv", ".venv"]
+
+[tool.ruff.lint]
+# E/W : pycodestyle · F : pyflakes (bugs évidents) · I : imports triés · B : bugbear (pièges classiques)
+select = ["E", "F", "W", "I", "B"]
+# B008 : appel de fonction en valeur par défaut — c'est le mécanisme d'injection
+# de dépendances idiomatique de FastAPI (`Depends(get_db)`), pas un piège ici.
+ignore = ["B008"]
+
+[tool.ruff.format]
+quote-style = "double"

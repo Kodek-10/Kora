@@ -1,10 +1,10 @@
 """Routes liées à la génération, l'édition, l'historique et le statut des posts."""
 
 import random
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import Optional
 
 from app.database import get_db
 from app.models.post import Post
@@ -29,7 +29,7 @@ def generate_post(payload: GeneratePostRequest, db: Session = Depends(get_db)):
     except RuntimeError as e:
         # Message clair renvoyé au frontend plutôt qu'un plantage silencieux
         # (recommandation de la section risques du cahier des charges).
-        raise HTTPException(status_code=502, detail=str(e))
+        raise HTTPException(status_code=502, detail=str(e)) from e
 
     post = Post(
         sujet=payload.sujet,
@@ -44,9 +44,7 @@ def generate_post(payload: GeneratePostRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(post)
 
-    return GeneratePostResponse(
-        id=post.id, post=post.post, hashtags=post.hashtags, image_url=post.image_url
-    )
+    return GeneratePostResponse(id=post.id, post=post.post, hashtags=post.hashtags, image_url=post.image_url)
 
 
 @router.get("/history", response_model=list[PostOut])

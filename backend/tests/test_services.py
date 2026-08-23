@@ -5,8 +5,6 @@ Contrat vérifié : ces sources ne doivent JAMAIS faire planter le calendrier
 par un retour vide, pas une exception.
 """
 
-from unittest.mock import patch
-
 from app.services.github_service import get_recent_activity_summary
 from app.services.tech_news_service import get_trending_tech_topics
 
@@ -35,9 +33,7 @@ class TestTechNews:
         monkeypatch.setattr("app.services.tech_news_service.requests.get", fake_get)
 
         result = get_trending_tech_topics()
-        assert result == (
-            "Actualités tech du moment :\n- Titre 101\n- Titre 102\n- Titre 103"
-        )
+        assert result == ("Actualités tech du moment :\n- Titre 101\n- Titre 102\n- Titre 103")
 
     def test_un_article_en_échec_n_emporte_pas_les_autres(self, monkeypatch):
         calls = {"count": 0}

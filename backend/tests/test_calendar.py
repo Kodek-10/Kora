@@ -79,9 +79,7 @@ class TestSuggestTopics:
         monkeypatch.setattr("app.services.github_service.requests.get", network_down)
         monkeypatch.setattr("app.services.tech_news_service.requests.get", network_down)
 
-        with patch(
-            "app.routes.calendar.generate_topic_suggestions", return_value=["Sujet seul"]
-        ):
+        with patch("app.routes.calendar.generate_topic_suggestions", return_value=["Sujet seul"]):
             response = client.post("/api/calendar/suggest", json={"nombre": 1, "jours": 5})
 
         assert response.status_code == 200

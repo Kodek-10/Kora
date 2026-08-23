@@ -2,6 +2,7 @@
 jamais codées en dur ailleurs dans le code."""
 
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()

@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import CORS_ORIGINS
 from app.database import init_db
-from app.routes import posts, calendar
+from app.routes import calendar, posts
 
 
 @asynccontextmanager
