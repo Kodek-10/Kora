@@ -1,0 +1,20 @@
+# Environnement
+.env
+backend/.env
+
+# Base de données locale
+backend/kora.db
+
+# Dépendances
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Build
+frontend/dist/
+
+# Éditeur
+.vscode/
+.DS_Store
