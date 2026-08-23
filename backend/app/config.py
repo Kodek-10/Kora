@@ -8,7 +8,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+# Défaut aligné sur la recommandation Google actuelle : gemini-2.5-flash
+# n'est plus disponible pour les nouveaux comptes (404 à l'appel).
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
 
 # Pollinations.ai ne nécessite pas de clé, mais l'URL de base reste configurable
 # au cas où tu changes de service d'image plus tard sans réécrire le code.

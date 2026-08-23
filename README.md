@@ -8,7 +8,7 @@ Générateur personnel de posts LinkedIn (texte + image), assisté par IA — pr
 |---|---|
 | Backend | FastAPI + Uvicorn |
 | Base de données | SQLite (fichier local `kora.db`, aucun serveur à gérer) |
-| IA texte | Gemini 2.5 Flash (sortie JSON structurée) |
+| IA texte | Gemini 3.6 Flash (sortie JSON structurée) |
 | IA image | Pollinations.ai |
 | Frontend | React + Vite + Tailwind CSS |
 
