@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
 
 // Note de conception : le texte généré est affiché dans un <textarea> modifiable,
@@ -13,10 +13,18 @@ export default function PostGenerator({ initialSujet = '' }) {
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null)
   const [editedText, setEditedText] = useState('')
+  const [editedHashtags, setEditedHashtags] = useState('')
+  const [editedDate, setEditedDate] = useState('')
   const [copied, setCopied] = useState(false)
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
   const [regeneratingImage, setRegeneratingImage] = useState(false)
+
+  // Pré-remplissage depuis le calendrier ("Développer →") : le composant
+  // peut rester monté lors du changement d'onglet, on resynchronise.
+  useEffect(() => {
+    if (initialSujet) setSujet(initialSujet)
+  }, [initialSujet])
 
   async function handleGenerate() {
     if (sujet.trim().length < 10) {
@@ -29,6 +37,8 @@ export default function PostGenerator({ initialSujet = '' }) {
       const data = await api.generatePost({ sujet, ton, langue })
       setResult(data)
       setEditedText(data.post)
+      setEditedHashtags((data.hashtags || []).join(' '))
+      setEditedDate(data.date_planifiee || '')
     } catch (e) {
       setError(e.message)
     } finally {
@@ -57,8 +67,26 @@ export default function PostGenerator({ initialSujet = '' }) {
   async function handleSave() {
     if (!result) return
     setSaving(true)
+    setError(null)
     try {
-      await api.updatePost(result.id, { post: editedText })
+      const parsedHashtags = editedHashtags
+        .split(/[\s,]+/)
+        .map((t) => t.trim())
+        .filter(Boolean)
+      const payload = {
+        post: editedText,
+        hashtags: parsedHashtags,
+        date_planifiee: editedDate || null,
+      }
+      const updated = await api.updatePost(result.id, payload)
+      setResult((prev) => ({
+        ...prev,
+        post: updated.post,
+        hashtags: updated.hashtags || parsedHashtags,
+        date_planifiee: updated.date_planifiee,
+      }))
+      setEditedHashtags((updated.hashtags || []).join(' '))
+      setEditedDate(updated.date_planifiee || '')
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch (e) {
@@ -165,12 +193,35 @@ export default function PostGenerator({ initialSujet = '' }) {
             </div>
           )}
 
-          <div className="flex flex-wrap gap-2">
-            {result.hashtags.map((tag) => (
-              <span key={tag} className="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-full">
-                {tag}
-              </span>
-            ))}
+          <div className="space-y-2">
+            <label className="block text-xs font-medium text-neutral-600">Hashtags — séparés par espaces ou virgules</label>
+            <input
+              value={editedHashtags}
+              onChange={(e) => setEditedHashtags(e.target.value)}
+              placeholder="#IA #AfricaTech #Cybersecurite"
+              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            />
+            <div className="flex flex-wrap gap-2">
+              {editedHashtags
+                .split(/[\s,]+/)
+                .filter(Boolean)
+                .map((tag) => (
+                  <span key={tag} className="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-full">
+                    {tag.startsWith('#') ? tag : `#${tag}`}
+                  </span>
+                ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-600 mb-1">Date planifiée (optionnelle)</label>
+            <input
+              type="date"
+              value={editedDate}
+              onChange={(e) => setEditedDate(e.target.value)}
+              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            />
+            <p className="text-xs text-neutral-400 mt-1">Laisse vide pour un brouillon sans date, ou choisis une date pour planifier.</p>
           </div>
 
           <div className="flex flex-wrap gap-3">
