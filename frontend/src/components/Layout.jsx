@@ -8,7 +8,7 @@ export default function Layout({ children, activeTab, onTabChange }) {
   const isActive = (id) => activeTab === id
 
   return (
-    <div className="min-h-screen bg-background text-on-background font-body-md flex selection:bg-secondary-container selection:text-on-secondary-container">
+    <div className="min-h-screen bg-background text-on-background font-body-md flex flex-col selection:bg-secondary-container selection:text-on-secondary-container">
       {/* Desktop SideNav */}
       <nav className="hidden lg:flex flex-col h-screen fixed left-0 top-0 p-4 gap-4 w-64 bg-surface-container-low border-r border-surface-border z-40">
         <div className="flex items-center gap-3 px-2 py-2 mb-2">
@@ -108,7 +108,7 @@ export default function Layout({ children, activeTab, onTabChange }) {
 
       {/* Main Content */}
       <main className="flex-1 lg:ml-64 w-full min-h-screen overflow-x-hidden">
-        <div className="max-w-container-max mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8 lg:py-10 pb-24 lg:pb-10">{children}</div>
+        <div className="max-w-container-max mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8 lg:py-10 pb-28 lg:pb-10">{children}</div>
       </main>
 
       {/* Mobile BottomNav */}
