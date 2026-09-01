@@ -82,23 +82,23 @@ export default function Layout({ children, activeTab, onTabChange }) {
       </nav>
 
       {/* Mobile TopNav */}
-      <header className="lg:hidden sticky top-0 z-50 flex justify-between items-center w-full px-6 py-4 border-b border-surface-border bg-surface text-primary">
-        <div className="text-headline-md-mobile font-headline-md-mobile font-bold">Kora</div>
-        <div className="flex gap-4">
-          <button onClick={() => onTabChange('generate')} className={`text-label-md font-label-md pb-1 border-b-2 transition-colors ${isActive('generate') ? 'text-primary border-primary font-bold' : 'text-on-surface-variant border-transparent'}`}>
+      <header className="lg:hidden sticky top-0 z-50 flex items-center justify-between gap-2 w-full px-4 py-3 border-b border-surface-border bg-surface text-primary">
+        <div className="text-headline-md-mobile font-headline-md-mobile font-bold shrink-0">Kora</div>
+        <div className="flex items-center gap-1.5 sm:gap-3 overflow-x-auto no-scrollbar">
+          <button onClick={() => onTabChange('generate')} className={`whitespace-nowrap text-label-sm sm:text-label-md font-label-md px-1.5 sm:px-2 pb-1 border-b-2 transition-colors ${isActive('generate') ? 'text-primary border-primary font-bold' : 'text-on-surface-variant border-transparent'}`}>
             Générer
           </button>
-          <button onClick={() => onTabChange('history')} className={`text-label-md font-label-md pb-1 border-b-2 transition-colors ${isActive('history') ? 'text-primary border-primary font-bold' : 'text-on-surface-variant border-transparent'}`}>
+          <button onClick={() => onTabChange('history')} className={`whitespace-nowrap text-label-sm sm:text-label-md font-label-md px-1.5 sm:px-2 pb-1 border-b-2 transition-colors ${isActive('history') ? 'text-primary border-primary font-bold' : 'text-on-surface-variant border-transparent'}`}>
             Historique
           </button>
-          <button onClick={() => onTabChange('calendar')} className={`text-label-md font-label-md pb-1 border-b-2 transition-colors ${isActive('calendar') ? 'text-primary border-primary font-bold' : 'text-on-surface-variant border-transparent'}`}>
+          <button onClick={() => onTabChange('calendar')} className={`whitespace-nowrap text-label-sm sm:text-label-md font-label-md px-1.5 sm:px-2 pb-1 border-b-2 transition-colors ${isActive('calendar') ? 'text-primary border-primary font-bold' : 'text-on-surface-variant border-transparent'}`}>
             Calendrier
           </button>
         </div>
-        <div className="flex gap-3 text-on-surface-variant">
-          <span className="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">notifications</span>
-          <button onClick={() => onTabChange('settings')} className={isActive('settings') ? 'text-primary' : 'text-on-surface-variant'}>
-            <span className="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">account_circle</span>
+        <div className="flex items-center gap-2 sm:gap-3 text-on-surface-variant shrink-0">
+          <span className="material-symbols-outlined cursor-pointer hover:text-primary transition-colors hidden sm:inline" style={{ fontSize: '20px' }}>notifications</span>
+          <button onClick={() => onTabChange('settings')} className={`${isActive('settings') ? 'text-primary' : 'text-on-surface-variant'} p-1`}>
+            <span className="material-symbols-outlined cursor-pointer hover:text-primary transition-colors" style={{ fontSize: '20px' }}>account_circle</span>
           </button>
         </div>
       </header>
@@ -107,8 +107,8 @@ export default function Layout({ children, activeTab, onTabChange }) {
       {/* We keep single row top nav for simplicity */}
 
       {/* Main Content */}
-      <main className="flex-1 lg:ml-64 w-full min-h-screen">
-        <div className="max-w-container-max mx-auto w-full px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-10 pb-24 lg:pb-10">{children}</div>
+      <main className="flex-1 lg:ml-64 w-full min-h-screen overflow-x-hidden">
+        <div className="max-w-container-max mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8 lg:py-10 pb-24 lg:pb-10">{children}</div>
       </main>
 
       {/* Mobile BottomNav */}

@@ -102,17 +102,17 @@ export default function History() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4">
-        <h2 className="text-display-lg font-display-lg text-primary">Historique des publications</h2>
-        <div className="flex flex-wrap gap-3">
+    <div className="flex flex-col gap-4 sm:gap-6">
+      <div className="flex flex-col gap-3 sm:gap-4">
+        <h2 className="text-[28px] leading-8 sm:text-display-lg font-display-lg text-primary">Historique des publications</h2>
+        <div className="flex gap-2 sm:gap-3 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
           {['', 'idea', 'draft', 'scheduled', 'published'].map((s) => {
             const active = filter === s
             return (
               <button
                 key={s || 'all'}
                 onClick={() => setFilter(s)}
-                className={`px-4 py-2 rounded-full font-label-sm text-label-sm uppercase tracking-wider border transition-all ${
+                className={`shrink-0 px-3 sm:px-4 py-2 rounded-full font-label-sm text-label-sm uppercase tracking-wider border transition-all whitespace-nowrap min-h-[36px] ${
                   active
                     ? 'bg-primary-container text-on-primary-container shadow-sm border-primary-container'
                     : 'bg-surface-container-high text-on-surface-variant border-surface-border hover:bg-surface-variant'
@@ -129,19 +129,19 @@ export default function History() {
       {loading && <p className="text-sm text-on-surface-variant flex items-center gap-2"><span className="material-symbols-outlined animate-spin" style={{fontSize:'16px'}}>progress_activity</span> Chargement…</p>}
 
       {!loading && posts.length === 0 ? (
-        <div className="bg-surface-container-lowest border border-dashed border-surface-border rounded-xl p-12 text-center">
+        <div className="bg-surface-container-lowest border border-dashed border-surface-border rounded-xl p-6 sm:p-12 text-center">
           <p className="text-body-md font-body-md text-on-surface-variant">Aucun post pour ce filtre.</p>
           <p className="text-label-sm font-label-sm text-outline mt-1">Génère ton premier post dans l'onglet Générer.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-gutter">
           {posts.map((post) => {
             const style = STATUS_STYLES[post.statut] || STATUS_STYLES.draft
             const isEditing = editingId === post.id
             return (
               <article
                 key={post.id}
-                className="bg-surface border border-surface-border rounded-xl p-6 relative flex flex-col hover:shadow-lg transition-shadow duration-300 group overflow-hidden"
+                className="bg-surface border border-surface-border rounded-xl p-4 sm:p-6 relative flex flex-col hover:shadow-lg transition-shadow duration-300 group overflow-hidden"
               >
                 <div className={`absolute left-0 top-0 bottom-0 w-1 ${style.border} rounded-l-xl`}></div>
 
@@ -159,25 +159,25 @@ export default function History() {
                       <label className="block text-label-sm font-label-sm text-on-surface-variant mb-1">Hashtags</label>
                       <input value={editHashtags} onChange={(e) => setEditHashtags(e.target.value)} placeholder="#IA #AfricaTech" className="w-full rounded-lg border border-surface-border bg-surface-bright px-3 py-2 text-body-md font-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-label-sm font-label-sm text-on-surface-variant mb-1">Date</label>
-                        <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} className="w-full rounded-lg border border-surface-border bg-surface-bright px-3 py-2 text-label-md font-label-md focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+                        <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} className="w-full rounded-lg border border-surface-border bg-surface-bright px-3 py-2.5 text-label-md font-label-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-[16px]" />
                       </div>
                       <div>
                         <label className="block text-label-sm font-label-sm text-on-surface-variant mb-1">Statut</label>
-                        <select value={editStatut} onChange={(e) => setEditStatut(e.target.value)} className="w-full rounded-lg border border-surface-border bg-surface-bright px-3 py-2 text-label-md font-label-md focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                        <select value={editStatut} onChange={(e) => setEditStatut(e.target.value)} className="w-full rounded-lg border border-surface-border bg-surface-bright px-3 py-2.5 text-label-md font-label-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-[16px]">
                           {STATUT_OPTIONS.map((s) => (
                             <option key={s} value={s}>{STATUT_LABELS[s]}</option>
                           ))}
                         </select>
                       </div>
                     </div>
-                    <div className="flex gap-2 pt-2">
-                      <button onClick={() => handleSave(post)} disabled={saving} className="flex-1 bg-secondary text-on-secondary py-2 rounded-lg font-label-md text-label-md hover:bg-on-secondary-fixed-variant disabled:opacity-50 transition-colors">
+                    <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                      <button onClick={() => handleSave(post)} disabled={saving} className="flex-1 bg-secondary text-on-secondary py-3 rounded-lg font-label-md text-label-md hover:bg-on-secondary-fixed-variant disabled:opacity-50 transition-colors min-h-[44px]">
                         {saving ? '…' : 'Enregistrer'}
                       </button>
-                      <button onClick={cancelEdit} disabled={saving} className="flex-1 border border-surface-border py-2 rounded-lg font-label-md text-label-md hover:bg-surface-container-low transition-colors">Annuler</button>
+                      <button onClick={cancelEdit} disabled={saving} className="flex-1 border border-surface-border py-3 rounded-lg font-label-md text-label-md hover:bg-surface-container-low transition-colors min-h-[44px]">Annuler</button>
                     </div>
                   </div>
                 ) : (

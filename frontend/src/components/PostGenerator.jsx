@@ -120,12 +120,12 @@ export default function PostGenerator({ initialSujet = '' }) {
   }
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-12 gap-gutter">
+    <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
       {/* Left: Form */}
       <section className="xl:col-span-5 flex flex-col">
-        <div className="bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_12px_rgba(15,23,42,0.04)] border border-surface-border flex flex-col h-full">
-          <h2 className="text-headline-sm font-headline-sm text-primary mb-6">Créer un nouveau post</h2>
-          <div className="flex-1 flex flex-col gap-6">
+        <div className="bg-surface-container-lowest rounded-xl p-4 sm:p-6 shadow-[0_4px_12px_rgba(15,23,42,0.04)] border border-surface-border flex flex-col h-full">
+          <h2 className="text-headline-sm font-headline-sm text-primary mb-4 sm:mb-6">Créer un nouveau post</h2>
+          <div className="flex-1 flex flex-col gap-5 sm:gap-6">
             <div className="flex flex-col gap-2">
               <label className="text-label-md font-label-md text-on-surface" htmlFor="prompt-input">
                 De quoi veux-tu parler ?
@@ -135,18 +135,18 @@ export default function PostGenerator({ initialSujet = '' }) {
                   id="prompt-input"
                   value={sujet}
                   onChange={(e) => setSujet(e.target.value)}
-                  rows={5}
+                  rows={4}
                   maxLength={500}
                   placeholder="Ex: Les 3 avantages de l'intelligence artificielle pour les designers UX..."
-                  className="w-full bg-surface-bright border border-surface-border rounded-lg p-4 text-body-md font-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none pr-16"
+                  className="w-full bg-surface-bright border border-surface-border rounded-lg p-3 sm:p-4 text-body-md font-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none pr-14 sm:pr-16 text-[16px] sm:text-body-md"
                 />
-                <span className="absolute bottom-3 right-3 text-label-sm font-label-sm text-on-surface-variant">
+                <span className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 text-label-sm font-label-sm text-on-surface-variant">
                   {sujet.length}/500
                 </span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="flex flex-col gap-2">
                 <label className="text-label-md font-label-md text-on-surface" htmlFor="tone-select">
                   Ton
@@ -192,14 +192,14 @@ export default function PostGenerator({ initialSujet = '' }) {
           <button
             onClick={handleGenerate}
             disabled={loading}
-            className="mt-8 w-full bg-secondary text-on-secondary py-4 rounded-lg font-label-md text-label-md font-bold shadow-[0_4px_12px_rgba(0,108,73,0.2)] hover:bg-on-secondary-fixed-variant disabled:opacity-50 disabled:cursor-not-allowed transition-all flex justify-center items-center gap-2 group"
+            className="mt-6 sm:mt-8 w-full bg-secondary text-on-secondary py-3.5 sm:py-4 rounded-lg font-label-md text-label-md font-bold shadow-[0_4px_12px_rgba(0,108,73,0.2)] hover:bg-on-secondary-fixed-variant disabled:opacity-50 disabled:cursor-not-allowed transition-all flex justify-center items-center gap-2 group min-h-[48px]"
           >
             <span className="material-symbols-outlined group-hover:rotate-12 transition-transform" style={{ fontSize: '18px' }}>
               auto_awesome
             </span>
             {loading ? 'Génération en cours…' : 'Générer le post'}
           </button>
-          {error && <p className="text-sm text-error-red mt-3">{error}</p>}
+          {error && <p className="text-sm text-error-red mt-3 break-words">{error}</p>}
         </div>
       </section>
 
@@ -207,16 +207,16 @@ export default function PostGenerator({ initialSujet = '' }) {
       <section className="xl:col-span-7 flex flex-col">
         {result ? (
           <div className="bg-surface-container-lowest rounded-xl p-0 shadow-[0_4px_12px_rgba(15,23,42,0.04)] border border-surface-border overflow-hidden flex flex-col h-full">
-            <div className="px-6 py-4 border-b border-surface-border bg-surface/50 flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-status-published"></span>
-                <span className="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Aperçu Généré</span>
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-surface-border bg-surface/50 flex justify-between items-center gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="w-2 h-2 rounded-full bg-status-published shrink-0"></span>
+                <span className="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider truncate">Aperçu Généré</span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 shrink-0">
                 <button
                   onClick={handleRegenerateImage}
                   disabled={regeneratingImage}
-                  className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-md transition-colors disabled:opacity-50"
+                  className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-md transition-colors disabled:opacity-50 min-h-[36px] min-w-[36px] flex items-center justify-center"
                   title="Régénérer l'image"
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
@@ -227,7 +227,7 @@ export default function PostGenerator({ initialSujet = '' }) {
             </div>
 
             {result.image_url && (
-              <div className="relative w-full h-64 md:h-80 bg-surface-container group overflow-hidden">
+              <div className="relative w-full h-48 sm:h-64 md:h-80 bg-surface-container group overflow-hidden">
                 <img src={result.image_url} alt="Visuel généré" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
                   <button
@@ -243,14 +243,14 @@ export default function PostGenerator({ initialSujet = '' }) {
               </div>
             )}
 
-            <div className="p-6 flex-1 flex flex-col gap-4">
+            <div className="p-4 sm:p-6 flex-1 flex flex-col gap-4">
               <div className="space-y-2">
                 <label className="block text-label-sm font-label-sm text-on-surface-variant">Texte — relis avant de copier</label>
                 <textarea
                   value={editedText}
                   onChange={(e) => setEditedText(e.target.value)}
-                  rows={8}
-                  className="w-full bg-transparent border border-dashed border-transparent hover:border-surface-border focus:border-primary rounded-lg p-3 -ml-1 text-body-lg font-body-lg text-on-surface resize-none outline-none transition-colors bg-surface-bright focus:bg-surface-container-lowest"
+                  rows={6}
+                  className="w-full bg-surface-bright border border-surface-border hover:border-surface-border focus:border-primary rounded-lg p-3 text-body-md sm:text-body-lg font-body-lg text-on-surface resize-none outline-none transition-colors focus:bg-surface-container-lowest min-h-[140px] text-[16px]"
                   placeholder="Le texte généré apparaîtra ici…"
                 />
               </div>
@@ -261,14 +261,14 @@ export default function PostGenerator({ initialSujet = '' }) {
                   value={editedHashtags}
                   onChange={(e) => setEditedHashtags(e.target.value)}
                   placeholder="#IA #AfricaTech #Cybersecurite"
-                  className="w-full bg-surface-bright border border-surface-border rounded-lg px-3 py-2 text-body-md font-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                  className="w-full bg-surface-bright border border-surface-border rounded-lg px-3 py-2.5 text-body-md font-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-[16px]"
                 />
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {editedHashtags
                     .split(/[\s,]+/)
                     .filter(Boolean)
                     .map((tag) => (
-                      <span key={tag} className="px-2 py-1 bg-primary/10 text-primary text-label-sm font-label-sm rounded uppercase">
+                      <span key={tag} className="px-2 py-1 bg-primary/10 text-primary text-label-sm font-label-sm rounded uppercase break-all">
                         {tag.startsWith('#') ? tag : `#${tag}`}
                       </span>
                     ))}
@@ -281,17 +281,17 @@ export default function PostGenerator({ initialSujet = '' }) {
                   type="date"
                   value={editedDate}
                   onChange={(e) => setEditedDate(e.target.value)}
-                  className="w-full bg-surface-bright border border-surface-border rounded-lg px-3 py-2 text-body-md font-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                  className="w-full bg-surface-bright border border-surface-border rounded-lg px-3 py-2.5 text-body-md font-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-[16px]"
                 />
                 <p className="text-label-sm font-label-sm text-outline">Laisse vide pour un brouillon sans date.</p>
               </div>
             </div>
 
-            <div className="px-6 py-4 border-t border-surface-border bg-surface/50 flex flex-wrap justify-end gap-3">
+            <div className="px-4 sm:px-6 py-4 border-t border-surface-border bg-surface/50 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-6 py-2 border border-surface-border text-on-surface-variant font-label-md text-label-md rounded-lg hover:bg-surface-container transition-colors flex items-center gap-2 disabled:opacity-50"
+                className="w-full sm:w-auto px-6 py-3 border border-surface-border text-on-surface-variant font-label-md text-label-md rounded-lg hover:bg-surface-container transition-colors flex items-center justify-center gap-2 disabled:opacity-50 min-h-[44px]"
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
                   bookmark_border
@@ -300,7 +300,7 @@ export default function PostGenerator({ initialSujet = '' }) {
               </button>
               <button
                 onClick={handleCopy}
-                className="px-6 py-2 bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-[0_4px_12px_rgba(15,23,42,0.15)] hover:bg-inverse-surface transition-all flex items-center gap-2"
+                className="w-full sm:w-auto px-6 py-3 bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-[0_4px_12px_rgba(15,23,42,0.15)] hover:bg-inverse-surface transition-all flex items-center justify-center gap-2 min-h-[44px]"
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
                   content_copy
@@ -310,7 +310,7 @@ export default function PostGenerator({ initialSujet = '' }) {
             </div>
           </div>
         ) : (
-          <div className="bg-surface-container-lowest rounded-xl p-12 shadow-[0_4px_12px_rgba(15,23,42,0.04)] border border-dashed border-surface-border flex flex-col items-center justify-center h-full text-center">
+          <div className="bg-surface-container-lowest rounded-xl p-6 sm:p-12 shadow-[0_4px_12px_rgba(15,23,42,0.04)] border border-dashed border-surface-border flex flex-col items-center justify-center h-full text-center min-h-[300px]">
             <div className="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mb-4">
               <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: '32px' }}>
                 auto_awesome

@@ -49,33 +49,33 @@ export default function Settings() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-4 md:flex-row md:items-end justify-between border-b border-surface-border pb-6">
-        <div>
-          <h2 className="text-display-lg font-display-lg text-primary">Paramètres</h2>
-          <p className="text-body-lg font-body-lg text-on-surface-variant mt-2 max-w-2xl">
+    <div className="flex flex-col gap-4 sm:gap-6">
+      <header className="flex flex-col gap-4 lg:flex-row lg:items-end justify-between border-b border-surface-border pb-4 sm:pb-6">
+        <div className="min-w-0">
+          <h2 className="text-[28px] leading-8 sm:text-display-lg font-display-lg text-primary">Paramètres</h2>
+          <p className="text-body-md sm:text-body-lg font-body-lg text-on-surface-variant mt-2 max-w-2xl text-sm sm:text-body-lg">
             Configurez votre environnement de génération, vos clés API et vos préférences de style.
           </p>
         </div>
-        <div className="flex gap-3 mt-2 md:mt-0">
-          <button onClick={handleReset} className="px-6 py-3 rounded-lg border border-surface-border text-primary font-headline-sm text-headline-sm hover:bg-surface-container-low transition-colors">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto mt-2 lg:mt-0">
+          <button onClick={handleReset} className="w-full sm:w-auto px-6 py-3 rounded-lg border border-surface-border text-primary font-headline-sm text-headline-sm hover:bg-surface-container-low transition-colors min-h-[48px]">
             Réinitialiser
           </button>
           <button
             onClick={handleSave}
-            className="px-6 py-3 rounded-lg bg-secondary text-on-secondary font-headline-sm text-headline-sm shadow-md hover:bg-on-secondary-fixed-variant transition-colors flex items-center gap-2"
+            className="w-full sm:w-auto px-6 py-3 rounded-lg bg-secondary text-on-secondary font-headline-sm text-headline-sm shadow-md hover:bg-on-secondary-fixed-variant transition-colors flex items-center justify-center gap-2 min-h-[48px]"
           >
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
               save
             </span>
-            {saved ? 'Sauvegardé !' : 'Sauvegarder les modifications'}
+            {saved ? 'Sauvegardé !' : 'Sauvegarder'}
           </button>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-gutter items-start">
-        <div className="lg:col-span-2 flex flex-col gap-6">
-          <section className="bg-surface-container-lowest rounded-xl border border-surface-border p-6 shadow-sm">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-gutter items-start">
+        <div className="lg:col-span-2 flex flex-col gap-4 sm:gap-6">
+          <section className="bg-surface-container-lowest rounded-xl border border-surface-border p-4 sm:p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6 border-b border-surface-border pb-4">
               <span className="material-symbols-outlined text-secondary">api</span>
               <h3 className="text-headline-md font-headline-md text-primary">Configuration API</h3>
@@ -125,23 +125,23 @@ export default function Settings() {
             </div>
           </section>
 
-          <section className="bg-surface-container-lowest rounded-xl border border-surface-border p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-6 border-b border-surface-border pb-4">
+          <section className="bg-surface-container-lowest rounded-xl border border-surface-border p-4 sm:p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-4 sm:mb-6 border-b border-surface-border pb-4">
               <span className="material-symbols-outlined text-secondary">person_edit</span>
-              <h3 className="text-headline-md font-headline-md text-primary">Profil &amp; Style (Persona)</h3>
+              <h3 className="text-headline-sm sm:text-headline-md font-headline-md text-primary">Profil &amp; Style (Persona)</h3>
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-label-md font-label-md text-on-surface-variant flex items-center justify-between" htmlFor="persona-bio">
                 Bio / Style personnalisé
                 <span className="text-label-sm font-label-sm text-outline">{personaBio.length}/500</span>
               </label>
-              <textarea
+                <textarea
                 id="persona-bio"
                 value={personaBio}
                 onChange={(e) => setPersonaBio(e.target.value)}
-                rows={6}
+                rows={5}
                 maxLength={500}
-                className="w-full px-4 py-3 rounded-lg border border-surface-border bg-surface-bright focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors font-body-md text-body-md text-primary resize-y"
+                className="w-full px-3 sm:px-4 py-3 rounded-lg border border-surface-border bg-surface-bright focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors font-body-md text-body-md text-primary resize-y text-[16px]"
               />
               <p className="text-label-sm font-label-sm text-outline mt-1">
                 Stocké localement (localStorage). Le prompt réel est dans <code className="bg-surface-container px-1 py-0.5 rounded">backend/app/services/gemini_service.py</code> → <code>STYLE_PROMPT</code>.
@@ -150,11 +150,11 @@ export default function Settings() {
           </section>
         </div>
 
-        <div className="flex flex-col gap-6">
-          <section className="bg-surface-container-lowest rounded-xl border border-surface-border p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-6 border-b border-surface-border pb-4">
+        <div className="flex flex-col gap-4 sm:gap-6">
+          <section className="bg-surface-container-lowest rounded-xl border border-surface-border p-4 sm:p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-4 sm:mb-6 border-b border-surface-border pb-4">
               <span className="material-symbols-outlined text-secondary">tune</span>
-              <h3 className="text-headline-md font-headline-md text-primary">Préférences</h3>
+              <h3 className="text-headline-sm sm:text-headline-md font-headline-md text-primary">Préférences</h3>
             </div>
             <div className="flex flex-col gap-5">
               <div className="flex flex-col gap-2">
@@ -201,10 +201,10 @@ export default function Settings() {
             </div>
           </section>
 
-          <section className="bg-surface-container-lowest rounded-xl border border-surface-border p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-6 border-b border-surface-border pb-4">
+          <section className="bg-surface-container-lowest rounded-xl border border-surface-border p-4 sm:p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-4 sm:mb-6 border-b border-surface-border pb-4">
               <span className="material-symbols-outlined text-secondary">explore</span>
-              <h3 className="text-headline-md font-headline-md text-primary">Sources d&apos;inspiration</h3>
+              <h3 className="text-headline-sm sm:text-headline-md font-headline-md text-primary">Sources d&apos;inspiration</h3>
             </div>
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between p-3 rounded-lg bg-surface-bright border border-surface-border">
