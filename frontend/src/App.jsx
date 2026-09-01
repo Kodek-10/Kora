@@ -3,6 +3,7 @@ import Layout from './components/Layout'
 import PostGenerator from './components/PostGenerator'
 import History from './components/History'
 import EditorialCalendar from './components/EditorialCalendar'
+import Settings from './components/Settings'
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('generate')
@@ -18,6 +19,7 @@ export default function App() {
       {activeTab === 'generate' && <PostGenerator initialSujet={prefilledSujet} />}
       {activeTab === 'history' && <History />}
       {activeTab === 'calendar' && <EditorialCalendar onSelectSujet={handleSelectSujet} />}
+      {activeTab === 'settings' && <Settings />}
     </Layout>
   )
 }
