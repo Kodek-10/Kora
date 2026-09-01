@@ -57,8 +57,10 @@ RESPONSE_SCHEMA = {
 
 def generate_post_text(sujet: str, ton: str, langue: str, max_retries: int = 2) -> dict:
     """Appelle Gemini avec sortie JSON forcée. Retente automatiquement en cas de
-    quota atteint (429), avec un court délai — évite un plantage silencieux."""
+    quota atteint (429) ou de surcharge temporaire (503), avec un court délai."""
     prompt = STYLE_PROMPT.format(sujet=sujet, ton=ton, langue=langue)
+    # Modèle principal + fallback stable (3.5-flash est actuellement moins surchargé que 3.6)
+    fallback_model = "gemini-3.5-flash"
 
     for attempt in range(max_retries + 1):
         try:
@@ -71,23 +73,49 @@ def generate_post_text(sujet: str, ton: str, langue: str, max_retries: int = 2) 
                 ),
             )
             data = json.loads(response.text)
-            # Garde-fou : même avec le schema JSON, on revalide manuellement
-            # le nombre de hashtags avant de faire confiance à la sortie.
             data["hashtags"] = data.get("hashtags", [])[:5]
             return data
         except Exception as e:
-            is_quota_error = "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e)
-            if is_quota_error and attempt < max_retries:
-                logger.warning("Quota Gemini atteint, nouvelle tentative dans %ss…", 2 * (attempt + 1))
-                time.sleep(2 * (attempt + 1))
+            msg = str(e)
+            is_quota_error = "429" in msg or "RESOURCE_EXHAUSTED" in msg
+            is_overload = "503" in msg or "UNAVAILABLE" in msg or "overloaded" in msg.lower()
+            if (is_quota_error or is_overload) and attempt < max_retries:
+                wait = 2 * (attempt + 1)
+                logger.warning(
+                    "%s Gemini (%s), nouvelle tentative dans %ss…",
+                    "Quota" if is_quota_error else "Surcharge",
+                    GEMINI_MODEL,
+                    wait,
+                )
+                time.sleep(wait)
                 continue
             if is_quota_error:
                 raise RuntimeError(
                     "Quota Gemini gratuit atteint. Réessaie dans quelques minutes, "
                     "ou passe temporairement à un modèle plus léger."
                 ) from e
-            # Journalisé sans la clé API (l'exception ne transporte que le
-            # message d'erreur de l'API, jamais les identifiants).
+            if is_overload:
+                # Dernier recours : essayer le fallback 3.5-flash une fois
+                if GEMINI_MODEL != fallback_model:
+                    try:
+                        logger.warning("Modèle %s surchargé, bascule vers %s…", GEMINI_MODEL, fallback_model)
+                        response = client.models.generate_content(
+                            model=fallback_model,
+                            contents=prompt,
+                            config=types.GenerateContentConfig(
+                                response_mime_type="application/json",
+                                response_schema=RESPONSE_SCHEMA,
+                            ),
+                        )
+                        data = json.loads(response.text)
+                        data["hashtags"] = data.get("hashtags", [])[:5]
+                        return data
+                    except Exception as fe:
+                        logger.warning("Fallback %s a échoué : %s", fallback_model, fe)
+                raise RuntimeError(
+                    "Modèle Gemini temporairement surchargé (503). Réessaie dans 10-20s, "
+                    "ou change GEMINI_MODEL en gemini-3.5-flash dans .env (plus stable)."
+                ) from e
             logger.warning("Échec de l'appel Gemini : %s", e)
             raise RuntimeError(f"Erreur lors de la génération du texte : {e}") from e
 
@@ -117,16 +145,41 @@ S'il n'y a pas de contexte, propose des sujets variés et intemporels.
 
 Réponds uniquement avec un objet JSON : {{"sujets": ["sujet 1", "sujet 2", ...]}}"""
 
-    response = client.models.generate_content(
-        model=GEMINI_MODEL,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            response_schema={
-                "type": "object",
-                "properties": {"sujets": {"type": "array", "items": {"type": "string"}}},
-                "required": ["sujets"],
-            },
-        ),
-    )
-    return json.loads(response.text)["sujets"][:nombre]
+    # Même logique de fallback pour les suggestions
+    fallback_model = "gemini-3.5-flash"
+    try:
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema={
+                    "type": "object",
+                    "properties": {"sujets": {"type": "array", "items": {"type": "string"}}},
+                    "required": ["sujets"],
+                },
+            ),
+        )
+        return json.loads(response.text)["sujets"][:nombre]
+    except Exception as e:
+        msg = str(e)
+        is_overload = "503" in msg or "UNAVAILABLE" in msg
+        if is_overload and GEMINI_MODEL != fallback_model:
+            try:
+                logger.warning("Suggest surchargé (%s), fallback %s…", GEMINI_MODEL, fallback_model)
+                response = client.models.generate_content(
+                    model=fallback_model,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema={
+                            "type": "object",
+                            "properties": {"sujets": {"type": "array", "items": {"type": "string"}}},
+                            "required": ["sujets"],
+                        },
+                    ),
+                )
+                return json.loads(response.text)["sujets"][:nombre]
+            except Exception:
+                pass
+        raise
