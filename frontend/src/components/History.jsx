@@ -17,7 +17,7 @@ const STATUS_STYLES = {
   published: { border: 'bg-status-published', chipBg: 'bg-status-published/10', chipText: 'text-status-published', dot: 'bg-status-published' },
 }
 
-export default function History() {
+export default function History({ onSelectPost }) {
   const [posts, setPosts] = useState([])
   const [filter, setFilter] = useState('')
   const [loading, setLoading] = useState(true)
@@ -29,6 +29,8 @@ export default function History() {
   const [editDate, setEditDate] = useState('')
   const [editStatut, setEditStatut] = useState('draft')
   const [saving, setSaving] = useState(false)
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
 
   useEffect(() => {
     load()
@@ -101,6 +103,20 @@ export default function History() {
     }
   }
 
+  async function handleDelete(post) {
+    setDeletingId(post.id)
+    setError(null)
+    try {
+      await api.deletePost(post.id)
+      setPosts((prev) => prev.filter((p) => p.id !== post.id))
+      setConfirmDeleteId(null)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4 sm:gap-6">
       <div className="flex flex-col gap-3 sm:gap-4">
@@ -141,7 +157,8 @@ export default function History() {
             return (
               <article
                 key={post.id}
-                className="bg-surface border border-surface-border rounded-xl p-4 sm:p-6 relative flex flex-col hover:shadow-lg transition-shadow duration-300 group overflow-hidden"
+                onClick={() => !isEditing && onSelectPost?.(post)}
+                className={`bg-surface border border-surface-border rounded-xl p-4 sm:p-6 relative flex flex-col hover:shadow-lg transition-shadow duration-300 group overflow-hidden ${!isEditing ? 'cursor-pointer' : ''}`}
               >
                 <div className={`absolute left-0 top-0 bottom-0 w-1 ${style.border} rounded-l-xl`}></div>
 
@@ -193,15 +210,23 @@ export default function History() {
                       </span>
                     </div>
 
-                    <h3 className="text-headline-sm font-headline-sm text-primary mb-2 line-clamp-2 group-hover:text-on-primary-container transition-colors">
-                      {post.sujet}
-                    </h3>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onSelectPost?.(post)
+                      }}
+                      className="text-left w-full group-hover:text-on-primary-container transition-colors"
+                    >
+                      <h3 className="text-headline-sm font-headline-sm text-primary mb-2 line-clamp-2 group-hover:text-on-primary-container transition-colors">
+                        {post.sujet}
+                      </h3>
 
-                    {post.post ? (
-                      <p className="text-body-md font-body-md text-on-surface-variant line-clamp-3 mb-4 flex-1">{post.post}</p>
-                    ) : (
-                      <p className="text-body-md font-body-md text-outline italic line-clamp-2 mb-4 flex-1">Aucun texte généré — en attente.</p>
-                    )}
+                      {post.post ? (
+                        <p className="text-body-md font-body-md text-on-surface-variant line-clamp-3 mb-4 flex-1">{post.post}</p>
+                      ) : (
+                        <p className="text-body-md font-body-md text-outline italic line-clamp-2 mb-4 flex-1">Aucun texte généré — en attente.</p>
+                      )}
+                    </button>
 
                     {post.hashtags && post.hashtags.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mb-3">
@@ -214,7 +239,15 @@ export default function History() {
                     )}
 
                     {post.image_url && (
-                      <img src={post.image_url} alt="" className="w-full h-28 object-cover rounded-lg border border-surface-border mb-3" />
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onSelectPost?.(post)
+                        }}
+                        className="w-full block"
+                      >
+                        <img src={post.image_url} alt="" className="w-full h-28 object-cover rounded-lg border border-surface-border mb-3 hover:opacity-90 transition-opacity" />
+                      </button>
                     )}
 
                     {post.date_planifiee && (
@@ -224,20 +257,72 @@ export default function History() {
                       </div>
                     )}
 
-                    <div className="flex justify-between items-center mt-auto border-t border-surface-border pt-4 gap-2">
-                      <select
-                        value={post.statut}
-                        onChange={(e) => handleQuickStatusChange(post, e.target.value)}
-                        className="text-label-sm font-label-sm border border-surface-border rounded-lg px-2 py-1.5 bg-surface-bright focus:border-primary outline-none"
-                      >
-                        {STATUT_OPTIONS.map((s) => (
-                          <option key={s} value={s}>{STATUT_LABELS[s]}</option>
-                        ))}
-                      </select>
-                      <button onClick={() => startEdit(post)} className="text-primary hover:text-on-primary-container font-label-md text-label-md flex items-center gap-1 transition-colors ml-auto">
-                        Éditer <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>edit</span>
-                      </button>
-                    </div>
+                    {confirmDeleteId === post.id ? (
+                      <div className="flex items-center gap-2 bg-error-container border border-error rounded-lg px-3 py-2 mt-auto">
+                        <span className="text-label-sm font-label-sm text-on-error-container flex-1">Supprimer ?</span>
+                        <button
+                          onClick={() => handleDelete(post)}
+                          disabled={deletingId === post.id}
+                          className="px-3 py-1 bg-error text-on-error rounded-md font-label-sm text-label-sm hover:bg-on-error-container disabled:opacity-50"
+                        >
+                          {deletingId === post.id ? '…' : 'Oui'}
+                        </button>
+                        <button onClick={() => setConfirmDeleteId(null)} className="px-3 py-1 bg-surface rounded-md font-label-sm text-label-sm border border-surface-border">
+                          Non
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex justify-between items-center mt-auto border-t border-surface-border pt-4 gap-1.5">
+                        <select
+                          value={post.statut}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => handleQuickStatusChange(post, e.target.value)}
+                          className="text-label-sm font-label-sm border border-surface-border rounded-lg px-2 py-1.5 bg-surface-bright focus:border-primary outline-none"
+                        >
+                          {STATUT_OPTIONS.map((s) => (
+                            <option key={s} value={s}>{STATUT_LABELS[s]}</option>
+                          ))}
+                        </select>
+                        <div className="flex items-center gap-1 ml-auto">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onSelectPost?.(post)
+                            }}
+                            className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-lg transition-colors"
+                            title="Voir en entier"
+                          >
+                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                              visibility
+                            </span>
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              startEdit(post)
+                            }}
+                            className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-lg transition-colors"
+                            title="Éditer"
+                          >
+                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                              edit
+                            </span>
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setConfirmDeleteId(post.id)
+                            }}
+                            className="p-1.5 text-outline hover:text-error hover:bg-error-container rounded-lg transition-colors"
+                            title="Supprimer"
+                          >
+                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                              delete
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
               </article>

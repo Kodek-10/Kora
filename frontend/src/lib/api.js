@@ -13,6 +13,7 @@ async function request(path, options = {}) {
     const errorBody = await response.json().catch(() => ({}))
     throw new Error(errorBody.detail || `Erreur ${response.status}`)
   }
+  if (response.status === 204) return null
   return response.json()
 }
 
@@ -51,4 +52,8 @@ export const api = {
 
   regenerateImage: (postId) =>
     request(`/api/posts/${postId}/regenerate-image`, { method: 'POST' }),
+
+  getPost: (postId) => request(`/api/posts/${postId}`),
+
+  deletePost: (postId) => request(`/api/posts/${postId}`, { method: 'DELETE' }),
 }

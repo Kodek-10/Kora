@@ -55,6 +55,24 @@ def get_history(statut: Optional[str] = Query(default=None), db: Session = Depen
     return query.all()
 
 
+@router.get("/posts/{post_id}", response_model=PostOut)
+def get_post(post_id: str, db: Session = Depends(get_db)):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post introuvable")
+    return post
+
+
+@router.delete("/posts/{post_id}", status_code=204)
+def delete_post(post_id: str, db: Session = Depends(get_db)):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post introuvable")
+    db.delete(post)
+    db.commit()
+    return None
+
+
 @router.patch("/posts/{post_id}/status", response_model=PostOut)
 def update_status(post_id: str, payload: UpdateStatusRequest, db: Session = Depends(get_db)):
     post = db.query(Post).filter(Post.id == post_id).first()
