@@ -49,7 +49,6 @@ export default function EditorialCalendar({ onSelectSujet }) {
   const [items, setItems] = useState([])
   const [nombre, setNombre] = useState(5)
   const [jours, setJours] = useState(7)
-  const [theme, setTheme] = useState('')
   const [inclureGithub, setInclureGithub] = useState(true)
   const [inclureActualites, setInclureActualites] = useState(true)
   const [loading, setLoading] = useState(false)
@@ -81,7 +80,7 @@ export default function EditorialCalendar({ onSelectSujet }) {
     setLoading(true)
     setError(null)
     try {
-      await api.suggestTopics({ theme: theme || undefined, nombre, jours, inclureGithub, inclureActualites })
+      await api.suggestTopics({ nombre, jours, inclureGithub, inclureActualites })
       await load()
     } catch (e) {
       setError(e.message)
@@ -148,14 +147,13 @@ export default function EditorialCalendar({ onSelectSujet }) {
                 <span className="material-symbols-outlined text-primary">tune</span> Configuration
               </h3>
               <div className="space-y-6">
-                <div>
-                  <label className="block text-label-sm font-label-sm text-on-surface-variant mb-2">Thème Principal</label>
-                  <input
-                    value={theme}
-                    onChange={(e) => setTheme(e.target.value)}
-                    placeholder="Ex: Tendances IA 2024"
-                    className="w-full bg-surface-container-lowest border border-surface-border rounded-lg px-4 py-3 text-body-md font-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-colors placeholder:text-outline"
-                  />
+                <div className="bg-secondary-container/10 border border-secondary-container rounded-lg p-3 flex gap-2">
+                  <span className="material-symbols-outlined text-secondary shrink-0" style={{ fontSize: '18px' }}>
+                    auto_awesome
+                  </span>
+                  <p className="text-label-sm font-label-sm text-on-secondary-container">
+                    Kora analyse ton activité GitHub et l'actualité tech pour te proposer automatiquement des sujets pertinents — aucun thème à saisir.
+                  </p>
                 </div>
 
                 <div>
